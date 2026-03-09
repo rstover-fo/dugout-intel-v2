@@ -2,6 +2,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "./ConvexClientProvider";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Dugout Intel",
   description: "Real-time coaching intelligence for youth baseball",
