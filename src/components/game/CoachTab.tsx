@@ -25,7 +25,6 @@ interface CoachTabProps {
 
 export function CoachTab({ messages, gameId, teamId, game }: CoachTabProps) {
   const pitchingStats = useQuery(api.pitching.getStats, { gameId, teamId });
-  const atBatResults = useQuery(api.lineup.getAtBatResults, { gameId, teamId });
 
   function buildExport(): string {
     const lines: string[] = [];

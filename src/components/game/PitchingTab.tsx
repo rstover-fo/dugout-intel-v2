@@ -36,6 +36,7 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
   const staffAvailability = useQuery(api.pitching.getStaffAvailability, { teamId });
   const logPitch = useMutation(api.pitching.logPitch);
   const switchPitcher = useMutation(api.pitching.switchPitcher);
+  const endCurrentPitcher = useMutation(api.pitching.endCurrentPitcher);
 
   const [veloInput, setVeloInput] = useState("");
   const [isNewBatter, setIsNewBatter] = useState(true);
@@ -156,11 +157,10 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => switchPitcher({
+          onClick={() => endCurrentPitcher({
             gameId,
             teamId,
-            currentAppearanceId: activeAppearance.appearanceId,
-            newPitcherId: activeAppearance.playerId,
+            appearanceId: activeAppearance.appearanceId,
             inning: game.inning,
             report: `${pitchCount}p, ${strikePct}% K, ${bf} BF`,
           })}

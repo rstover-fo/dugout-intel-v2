@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId, assertTeamAccess } from "./helpers";
+import { getAuthUserId, assertTeamAccess, assertOwnerAccess } from "./helpers";
 
 export const listMyTeams = query({
   args: {},
@@ -46,7 +46,7 @@ export const getTeam = query({
 export const inviteMember = mutation({
   args: { teamId: v.id("teams"), userId: v.string(), role: v.union(v.literal("coach"), v.literal("viewer")) },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertOwnerAccess(ctx, args.teamId);
     await ctx.db.insert("teamMembers", {
       teamId: args.teamId,
       userId: args.userId,

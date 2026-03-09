@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { assertTeamAccess } from "./helpers";
+import { assertTeamAccess, assertWriteAccess, assertDocBelongsToTeam } from "./helpers";
 
 export const create = mutation({
   args: {
@@ -8,7 +8,7 @@ export const create = mutation({
     opponent: v.string(),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
     return await ctx.db.insert("games", {
       teamId: args.teamId,
       opponent: args.opponent,
@@ -24,7 +24,8 @@ export const create = mutation({
 export const start = mutation({
   args: { gameId: v.id("games"), teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
     await ctx.db.patch(args.gameId, { status: "live" });
   },
 });
@@ -32,7 +33,8 @@ export const start = mutation({
 export const complete = mutation({
   args: { gameId: v.id("games"), teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
     await ctx.db.patch(args.gameId, { status: "completed" });
   },
 });
@@ -45,9 +47,8 @@ export const updateScore = mutation({
     delta: v.number(),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
-    const game = await ctx.db.get(args.gameId);
-    if (!game) throw new Error("Game not found");
+    await assertWriteAccess(ctx, args.teamId);
+    const game = await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
     if (args.side === "us") {
       await ctx.db.patch(args.gameId, { ourScore: Math.max(0, game.ourScore + args.delta) });
     } else {
@@ -59,7 +60,8 @@ export const updateScore = mutation({
 export const updateInning = mutation({
   args: { gameId: v.id("games"), teamId: v.id("teams"), inning: v.number() },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
     await ctx.db.patch(args.gameId, { inning: args.inning });
   },
 });
@@ -91,6 +93,6 @@ export const getGame = query({
   args: { gameId: v.id("games"), teamId: v.id("teams") },
   handler: async (ctx, args) => {
     await assertTeamAccess(ctx, args.teamId);
-    return await ctx.db.get(args.gameId);
+    return await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
   },
 });

@@ -33,13 +33,16 @@ export async function enqueue(mutation: Omit<QueuedMutation, "id" | "timestamp">
   });
 }
 
-export async function dequeueAll(): Promise<QueuedMutation[]> {
+export async function dequeueAll(functionName?: string): Promise<QueuedMutation[]> {
   const db = await openDB();
   const tx = db.transaction(STORE_NAME, "readonly");
   const store = tx.objectStore(STORE_NAME);
   return new Promise((resolve, reject) => {
     const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      const all: QueuedMutation[] = request.result;
+      resolve(functionName ? all.filter((m) => m.functionName === functionName) : all);
+    };
     request.onerror = () => reject(request.error);
   });
 }

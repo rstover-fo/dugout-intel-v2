@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { assertTeamAccess } from "./helpers";
+import { assertTeamAccess, assertWriteAccess, assertDocBelongsToTeam } from "./helpers";
 
 export const addBudgetEntry = mutation({
   args: {
@@ -11,7 +11,7 @@ export const addBudgetEntry = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
     const existing = await ctx.db
       .query("pitchBudgets")
       .withIndex("by_team_and_weekend", (q) =>
@@ -39,7 +39,8 @@ export const addBudgetEntry = mutation({
 export const removeBudgetEntry = mutation({
   args: { entryId: v.id("pitchBudgets"), teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.entryId, args.teamId);
     await ctx.db.delete(args.entryId);
   },
 });

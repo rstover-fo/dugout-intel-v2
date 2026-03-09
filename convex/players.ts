@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { assertTeamAccess } from "./helpers";
+import { assertTeamAccess, assertWriteAccess, assertDocBelongsToTeam } from "./helpers";
 
 export const getRoster = query({
   args: { teamId: v.id("teams") },
@@ -61,7 +61,7 @@ export const addPlayer = mutation({
     defenseNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
     return await ctx.db.insert("players", {
       teamId: args.teamId,
       name: args.name,
@@ -88,7 +88,8 @@ export const updatePlayer = mutation({
     defenseNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.playerId, args.teamId);
     const { playerId, teamId, ...updates } = args;
     const filtered = Object.fromEntries(
       Object.entries(updates).filter(([_, v]) => v !== undefined)
@@ -100,7 +101,8 @@ export const updatePlayer = mutation({
 export const removePlayer = mutation({
   args: { playerId: v.id("players"), teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.playerId, args.teamId);
     await ctx.db.delete(args.playerId);
   },
 });

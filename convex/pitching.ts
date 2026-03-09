@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { assertTeamAccess } from "./helpers";
+import { assertTeamAccess, assertWriteAccess, assertDocBelongsToTeam } from "./helpers";
 
 export const logPitch = mutation({
   args: {
@@ -14,7 +14,8 @@ export const logPitch = mutation({
     atBatResult: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
     await ctx.db.insert("pitchLogs", {
       appearanceId: args.appearanceId,
       gameId: args.gameId,
@@ -44,7 +45,8 @@ export const switchPitcher = mutation({
     report: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
     if (args.currentAppearanceId) {
       await ctx.db.patch(args.currentAppearanceId, {
         endInning: args.inning,
@@ -58,6 +60,24 @@ export const switchPitcher = mutation({
       pitchCount: 0,
     });
     return newAppearance;
+  },
+});
+
+export const endCurrentPitcher = mutation({
+  args: {
+    gameId: v.id("games"),
+    teamId: v.id("teams"),
+    appearanceId: v.id("pitcherAppearances"),
+    inning: v.number(),
+    report: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await assertWriteAccess(ctx, args.teamId);
+    await assertDocBelongsToTeam(ctx, args.gameId, args.teamId);
+    await ctx.db.patch(args.appearanceId, {
+      endInning: args.inning,
+      report: args.report,
+    });
   },
 });
 

@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { assertTeamAccess } from "./helpers";
+import { assertTeamAccess, assertWriteAccess } from "./helpers";
 
 export const logAtBat = mutation({
   args: {
@@ -10,7 +10,7 @@ export const logAtBat = mutation({
     result: v.string(),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
     const existing = await ctx.db
       .query("atBatResults")
       .withIndex("by_game", (q) => q.eq("gameId", args.gameId))
@@ -50,7 +50,7 @@ export const logOpponentPitch = mutation({
     velocity: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await assertTeamAccess(ctx, args.teamId);
+    await assertWriteAccess(ctx, args.teamId);
     const existing = await ctx.db
       .query("opponentPitcherLogs")
       .withIndex("by_game", (q) => q.eq("gameId", args.gameId))

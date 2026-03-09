@@ -11,19 +11,25 @@ export function useOfflineMutation<T extends FunctionReference<"mutation">>(
   const mutate = useMutation(mutation);
   const replayingRef = useRef(false);
 
+  const fnName = mutation.toString();
+
   const replay = useCallback(async () => {
     if (replayingRef.current) return;
     replayingRef.current = true;
     try {
-      const queued = await dequeueAll();
+      const queued = await dequeueAll(fnName);
       for (const item of queued) {
         await mutate(item.args as never);
       }
-      await clearQueue();
+      if (queued.length > 0) {
+        // Only clear entries we replayed, not the whole queue
+        const remaining = await dequeueAll();
+        if (remaining.length === 0) await clearQueue();
+      }
     } finally {
       replayingRef.current = false;
     }
-  }, [mutate]);
+  }, [mutate, fnName]);
 
   useEffect(() => {
     const handleOnline = () => {

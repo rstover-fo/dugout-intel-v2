@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { getAuthUserId } from "./helpers";
 
 const OUR_PITCHERS = [
   { name: "Sidor #1", number: "1", position: "P/SS", ppi: 16.0, fps: 55.8, bb: 0.58, fatiguePoint: 35 },
@@ -28,12 +29,14 @@ const OUR_BATTING_ORDER = [
 ];
 
 export const seedTeam = mutation({
-  args: { teamName: v.string(), season: v.string(), ownerId: v.string() },
+  args: { teamName: v.string(), season: v.string() },
   handler: async (ctx, args) => {
+    const ownerId = await getAuthUserId(ctx);
+
     // Check if team already exists
     const existing = await ctx.db
       .query("teams")
-      .withIndex("by_owner", (q) => q.eq("ownerId", args.ownerId))
+      .withIndex("by_owner", (q) => q.eq("ownerId", ownerId))
       .collect();
     if (existing.some((t) => t.name === args.teamName)) {
       return { status: "skipped", message: "Team already exists" };
@@ -43,11 +46,11 @@ export const seedTeam = mutation({
     const teamId = await ctx.db.insert("teams", {
       name: args.teamName,
       season: args.season,
-      ownerId: args.ownerId,
+      ownerId,
     });
     await ctx.db.insert("teamMembers", {
       teamId,
-      userId: args.ownerId,
+      userId: ownerId,
       role: "owner",
     });
 
