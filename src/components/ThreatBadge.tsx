@@ -1,23 +1,21 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-
 interface ThreatBadgeProps {
   threat: string;
 }
 
 const threatStyles: Record<string, string> = {
-  elite: "bg-red-600 text-white border-red-600",
-  high: "bg-orange-500 text-white border-orange-500",
-  medium: "bg-yellow-500 text-black border-yellow-500",
-  low: "bg-emerald-600 text-white border-emerald-600",
+  elite: "bg-destructive/15 text-destructive",
+  high: "bg-destructive/15 text-destructive",
+  medium: "bg-fatigue-med/15 text-fatigue-med",
+  low: "bg-muted text-muted-foreground",
 };
 
 export function ThreatBadge({ threat }: ThreatBadgeProps) {
   const style = threatStyles[threat] ?? "bg-muted text-muted-foreground";
   return (
-    <Badge className={style}>
-      {threat.toUpperCase()}
-    </Badge>
+    <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${style}`}>
+      {threat}
+    </span>
   );
 }

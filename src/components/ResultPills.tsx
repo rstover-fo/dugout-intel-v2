@@ -8,15 +8,15 @@ interface ResultPillsProps {
 
 export function ResultPills({ results }: ResultPillsProps) {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-1.5">
       {results.map((r, i) => {
-        const bg = isOut(r)
-          ? "bg-emerald-500/20 text-emerald-400"
+        const style = isOut(r)
+          ? "bg-dugout-strike/15 text-dugout-strike"
           : isHit(r)
-            ? "bg-yellow-500/20 text-yellow-400"
-            : "bg-red-500/20 text-red-400";
+            ? "bg-fatigue-med/15 text-fatigue-med"
+            : "bg-dugout-ball/15 text-dugout-ball";
         return (
-          <span key={i} className={`rounded px-1.5 py-0.5 text-xs font-medium ${bg}`}>
+          <span key={i} className={`rounded px-2.5 py-1 text-[10px] font-semibold ${style}`}>
             {r}
           </span>
         );

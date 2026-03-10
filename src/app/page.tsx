@@ -3,7 +3,6 @@
 import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,85 +27,121 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto max-w-lg p-4">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Dugout Intel</h1>
+    <main className="min-h-screen bg-background">
+      {/* Top Bar */}
+      <header className="flex items-center justify-between border-b border-border bg-dugout-surface px-6 py-3">
+        <span className="text-sm font-semibold text-foreground">{"> "}dugout_intel</span>
         <SignedIn>
           <UserButton />
         </SignedIn>
         <SignedOut>
           <SignInButton />
         </SignedOut>
-      </div>
+      </header>
 
-      <SignedIn>
-        <div className="space-y-3">
-          {teams === undefined && <p className="text-sm text-muted-foreground">Loading teams...</p>}
-          {teams?.length === 0 && (
-            <p className="text-sm text-muted-foreground">No teams yet. Create one to get started.</p>
-          )}
-          {teams?.map((team) =>
-            team ? (
-              <Link key={team._id} href={`/team/${team._id}`}>
-                <Card className="transition-colors hover:bg-accent/50">
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-base">{team.name}</CardTitle>
-                    <p className="text-xs text-muted-foreground">{team.season}</p>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ) : null
-          )}
-        </div>
-
-        {showForm ? (
-          <Card className="mt-4">
-            <CardContent className="space-y-3 p-4">
-              <div>
-                <Label htmlFor="teamName">Team Name</Label>
-                <Input
-                  id="teamName"
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  placeholder="Armadillos 9U"
-                />
-              </div>
-              <div>
-                <Label htmlFor="season">Season</Label>
-                <Input
-                  id="season"
-                  value={season}
-                  onChange={(e) => setSeason(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleCreate} disabled={!teamName.trim()}>Create Team</Button>
-                <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <Button className="mt-4 w-full" onClick={() => setShowForm(true)}>
-              + New Team
-            </Button>
-            {teams?.length === 0 && (
-              <Button
-                className="mt-2 w-full"
-                variant="outline"
-                disabled={seeding}
-                onClick={async () => {
-                  setSeeding(true);
-                  await seedTeam({ teamName: "Armadillos 9U", season: "Spring 2026" });
-                  setSeeding(false);
-                }}
-              >
-                {seeding ? "Seeding..." : "Seed Demo Team (Armadillos)"}
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <SignedIn>
+          {/* Section Header */}
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{"> "}your_teams</h1>
+            {!showForm && (
+              <Button size="sm" onClick={() => setShowForm(true)}>
+                + new_team
               </Button>
             )}
-          </>
-        )}
-      </SignedIn>
+          </div>
+
+          {/* Loading */}
+          {teams === undefined && (
+            <p className="text-xs text-muted-foreground">loading...</p>
+          )}
+
+          {/* Empty State */}
+          {teams?.length === 0 && !showForm && (
+            <div className="rounded-lg border border-border bg-dugout-surface-elevated p-8 text-center">
+              <p className="mb-1 text-sm text-muted-foreground">{"// "}no teams yet</p>
+              <p className="mb-4 text-xs text-muted-foreground">create one to get started</p>
+              <div className="flex justify-center gap-3">
+                <Button size="sm" onClick={() => setShowForm(true)}>
+                  + new_team
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={seeding}
+                  onClick={async () => {
+                    setSeeding(true);
+                    await seedTeam({ teamName: "Armadillos 9U", season: "Spring 2026" });
+                    setSeeding(false);
+                  }}
+                >
+                  {seeding ? "seeding..." : "seed_demo"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Team Cards */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {teams?.map((team) =>
+              team ? (
+                <Link key={team._id} href={`/team/${team._id}`}>
+                  <div className="group flex items-center gap-4 rounded-lg border border-border bg-dugout-surface-elevated p-4 transition-colors hover:border-primary/40 hover:bg-dugout-surface-elevated/80">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                      {team.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {team.name.toLowerCase().replace(/\s+/g, "_")}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{team.season}</p>
+                    </div>
+                    <span className="text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                      {">>"}
+                    </span>
+                  </div>
+                </Link>
+              ) : null
+            )}
+          </div>
+
+          {/* Create Team Form */}
+          {showForm && (
+            <div className="mt-6 rounded-lg border border-border bg-dugout-surface-elevated p-5">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{"> "}create_team</p>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="teamName" className="text-xs text-muted-foreground">team_name</Label>
+                  <Input
+                    id="teamName"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    placeholder="armadillos_9u"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="season" className="text-xs text-muted-foreground">season</Label>
+                  <Input
+                    id="season"
+                    value={season}
+                    onChange={(e) => setSeason(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button onClick={handleCreate} disabled={!teamName.trim()} size="sm">
+                    $ create
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>
+                    cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </SignedIn>
+      </div>
     </main>
   );
 }

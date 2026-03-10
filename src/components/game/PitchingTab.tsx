@@ -69,7 +69,6 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
     if (!activeAppearance) return;
     const prev = prevStatsRef.current;
 
-    // Find pitcher profile from staff
     const pitcher = staffAvailability?.find((p) => p.playerId === activeAppearance.playerId);
     if (!pitcher?.pitching) return;
 
@@ -124,20 +123,25 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
     setVeloInput("");
   }
 
+  // No active pitcher — show pitcher selection
   if (!activeAppearance) {
     return (
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">No active pitcher. Select one to start.</p>
-        {staffAvailability?.map((p) => (
-          <Button
-            key={p.playerId}
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => switchPitcher({ gameId, teamId, newPitcherId: p.playerId, inning: game.inning })}
-          >
-            #{p.number} {p.name}
-          </Button>
-        ))}
+      <div className="space-y-4">
+        <p className="text-xs text-muted-foreground">{"// "}no active pitcher — select one to start</p>
+        <div className="space-y-2">
+          {staffAvailability?.map((p) => (
+            <button
+              key={p.playerId}
+              className="flex w-full items-center justify-between rounded-lg border border-border bg-dugout-surface-elevated px-4 py-3 text-left transition-colors hover:border-primary/40"
+              onClick={() => switchPitcher({ gameId, teamId, newPitcherId: p.playerId, inning: game.inning })}
+            >
+              <span className="text-[11px] text-foreground">
+                <span className="font-semibold text-primary">#{p.number}</span>{" "}{p.name.toLowerCase().replace(/\s+/g, "_")}
+              </span>
+              <span className="text-[10px] text-muted-foreground">select {">"}</span>
+            </button>
+          ))}
+        </div>
       </div>
     );
   }
@@ -147,16 +151,26 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
     .map((p) => p.atBatResult!);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Pitcher Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <span className="text-sm font-bold">{activeAppearance.playerName}</span>
-          <span className="ml-2 text-xs text-muted-foreground">Inn {activeAppearance.startInning}+</span>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+            {activeAppearance.playerName.charAt(0)}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              {activeAppearance.playerName.toLowerCase().replace(/\s+/g, "_")}
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              inn {activeAppearance.startInning}+ | {pitchCount} pitches
+            </p>
+          </div>
         </div>
         <Button
           variant="destructive"
           size="sm"
+          className="text-[11px]"
           onClick={() => endCurrentPitcher({
             gameId,
             teamId,
@@ -165,7 +179,7 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
             report: `${pitchCount}p, ${strikePct}% K, ${bf} BF`,
           })}
         >
-          Pull Pitcher
+          pull_pitcher
         </Button>
       </div>
 
@@ -173,43 +187,49 @@ export function PitchingTab({ gameId, teamId, game, onAlert, onCoachMessage }: P
       <ProgressBar current={pitchCount} />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-2">
-        <StatBox label="Pitches" value={pitchCount} />
-        <StatBox label="K%" value={`${strikePct}%`} />
-        <StatBox label="BF" value={bf} />
-        <StatBox label="FPS" value={`${fps}%`} />
+      <div className="grid grid-cols-4 gap-3">
+        <StatBox label="pitches" value={pitchCount} />
+        <StatBox label="strike_%" value={`${strikePct}%`} highlight={Number(strikePct) >= 60} />
+        <StatBox label="batters" value={bf} />
+        <StatBox label="fps" value={`${fps}%`} highlight={Number(fps) >= 65} />
       </div>
 
       {/* Velo Chart */}
       <VeloChart velocities={velocities} />
 
       {/* Pitch Input */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <Input
           type="number"
-          placeholder="Velo"
+          placeholder="velo"
           value={veloInput}
           onChange={(e) => setVeloInput(e.target.value)}
-          className="w-20"
+          className="w-20 text-center"
         />
-        <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => handleLogPitch(true)}>
-          Strike
+        <Button
+          className="flex-1 bg-dugout-strike/15 text-dugout-strike border border-dugout-strike/30 hover:bg-dugout-strike/25"
+          onClick={() => handleLogPitch(true)}
+        >
+          STRIKE
         </Button>
-        <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => handleLogPitch(false)}>
-          Ball
+        <Button
+          className="flex-1 bg-dugout-ball/15 text-dugout-ball border border-dugout-ball/30 hover:bg-dugout-ball/25"
+          onClick={() => handleLogPitch(false)}
+        >
+          BALL
         </Button>
       </div>
 
       {/* At-Bat Outcomes */}
       <div>
-        <div className="mb-1 text-xs font-medium text-muted-foreground">End At-Bat</div>
+        <p className="mb-2 text-[10px] text-muted-foreground">{"// "}end_at_bat</p>
         <OutcomeButtons outcomes={PITCHER_OUTCOMES} onSelect={handleEndAtBat} />
       </div>
 
       {/* Results */}
       {atBatResults.length > 0 && (
         <div>
-          <div className="mb-1 text-xs font-medium text-muted-foreground">Results</div>
+          <p className="mb-2 text-[10px] text-muted-foreground">{"// "}results</p>
           <ResultPills results={atBatResults} />
         </div>
       )}

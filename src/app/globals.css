@@ -4,48 +4,112 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    /* Dugout Intel — Light Mode */
+    --background: 120 14% 98%;
+    --foreground: 0 0% 7%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 0 0% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 161 94% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 120 3% 90%;
+    --secondary-foreground: 0 0% 7%;
+    --muted: 120 7% 95%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 138 76% 97%;
+    --accent-foreground: 0 0% 7%;
+    --destructive: 0 84% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 120 3% 83%;
+    --input: 120 3% 83%;
+    --ring: 161 94% 30%;
     --radius: 0.5rem;
+
+    /* Dugout domain — Light */
+    --dugout-field: 161 94% 30%;
+    --dugout-dirt: 23 82% 31%;
+    --dugout-strike: 161 94% 30%;
+    --dugout-ball: 0 84% 51%;
+    --dugout-fatigue-low: 142 76% 36%;
+    --dugout-fatigue-med: 41 96% 40%;
+    --dugout-fatigue-high: 0 84% 51%;
+    --dugout-surface: 0 0% 100%;
+    --dugout-surface-elevated: 120 7% 95%;
+
+    /* Semantic — Light */
+    --color-success: 138 76% 92%;
+    --color-success-foreground: 142 72% 29%;
+    --color-warning: 48 96% 89%;
+    --color-warning-foreground: 28 80% 29%;
+    --color-error: 0 93% 94%;
+    --color-error-foreground: 0 70% 35%;
+    --color-info: 217 91% 92%;
+    --color-info-foreground: 221 83% 40%;
+
+    /* Sidebar — Light */
+    --sidebar: 120 3% 90%;
+    --sidebar-foreground: 0 0% 40%;
+    --sidebar-primary: 161 94% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 3% 83%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 120 3% 83%;
+    --sidebar-ring: 161 94% 30%;
   }
 
   .dark {
-    --background: 0 0% 7%;
+    /* Dugout Intel — Dark Mode (primary) */
+    --background: 0 0% 4%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 11%;
+    --card: 0 0% 8%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 11%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 17%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 17%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 17%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 0 0% 7%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 17%;
-    --input: 0 0% 17%;
-    --ring: 0 0% 83.1%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 160 84% 39%;
+
+    /* Dugout domain — Dark */
+    --dugout-field: 160 84% 39%;
+    --dugout-dirt: 32 95% 44%;
+    --dugout-strike: 160 84% 39%;
+    --dugout-ball: 0 84% 60%;
+    --dugout-fatigue-low: 142 71% 58%;
+    --dugout-fatigue-med: 48 97% 53%;
+    --dugout-fatigue-high: 0 84% 60%;
+    --dugout-surface: 0 0% 8%;
+    --dugout-surface-elevated: 0 0% 10%;
+
+    /* Semantic — Dark */
+    --color-success: 149 80% 7%;
+    --color-success-foreground: 142 71% 58%;
+    --color-warning: 27 96% 9%;
+    --color-warning-foreground: 38 92% 50%;
+    --color-error: 0 74% 16%;
+    --color-error-foreground: 0 84% 60%;
+    --color-info: 224 64% 14%;
+    --color-info-foreground: 217 91% 68%;
+
+    /* Sidebar — Dark */
+    --sidebar: 0 0% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 160 84% 39%;
   }
 }
 
