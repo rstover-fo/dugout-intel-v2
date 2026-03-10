@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useParams } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function TeamHomePage() {
   const params = useParams();
@@ -15,6 +16,8 @@ export default function TeamHomePage() {
   const roster = useQuery(api.players.getRoster, { teamId });
   const pitchers = useQuery(api.pitching.getStaffAvailability, { teamId });
   const liveGame = useQuery(api.games.getLive, { teamId });
+  const seedRoster = useMutation(api.seed.seedRoster);
+  const [seeding, setSeeding] = useState(false);
 
   if (!team) return <div className="p-4 text-sm text-muted-foreground">Loading...</div>;
 
@@ -58,6 +61,21 @@ export default function TeamHomePage() {
           <Link href={`/team/${teamId}/roster`}>
             <Button variant="outline" size="sm" className="mt-2 w-full">Manage Roster</Button>
           </Link>
+          {roster?.length === 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 w-full"
+              disabled={seeding}
+              onClick={async () => {
+                setSeeding(true);
+                await seedRoster({ teamId });
+                setSeeding(false);
+              }}
+            >
+              {seeding ? "Seeding..." : "Seed Demo Roster"}
+            </Button>
+          )}
         </CardContent>
       </Card>
 

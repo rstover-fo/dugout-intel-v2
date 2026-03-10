@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,9 +11,12 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function DashboardPage() {
-  const teams = useQuery(api.teams.listMyTeams);
+  const { isAuthenticated } = useConvexAuth();
+  const teams = useQuery(api.teams.listMyTeams, isAuthenticated ? {} : "skip");
   const createTeam = useMutation(api.teams.create);
+  const seedTeam = useMutation(api.seed.seedTeam);
   const [showForm, setShowForm] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [season, setSeason] = useState("Spring 2026");
 
@@ -83,9 +86,25 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <Button className="mt-4 w-full" onClick={() => setShowForm(true)}>
-            + New Team
-          </Button>
+          <>
+            <Button className="mt-4 w-full" onClick={() => setShowForm(true)}>
+              + New Team
+            </Button>
+            {teams?.length === 0 && (
+              <Button
+                className="mt-2 w-full"
+                variant="outline"
+                disabled={seeding}
+                onClick={async () => {
+                  setSeeding(true);
+                  await seedTeam({ teamName: "Armadillos 9U", season: "Spring 2026" });
+                  setSeeding(false);
+                }}
+              >
+                {seeding ? "Seeding..." : "Seed Demo Team (Armadillos)"}
+              </Button>
+            )}
+          </>
         )}
       </SignedIn>
     </main>

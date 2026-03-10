@@ -90,3 +90,55 @@ export const seedTeam = mutation({
     return { status: "seeded", teamId };
   },
 });
+
+export const seedRoster = mutation({
+  args: { teamId: v.id("teams") },
+  handler: async (ctx, args) => {
+    const ownerId = await getAuthUserId(ctx);
+    const team = await ctx.db.get(args.teamId);
+    if (!team || team.ownerId !== ownerId) throw new Error("Not your team");
+
+    // Check if players already exist
+    const existingPlayers = await ctx.db
+      .query("players")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect();
+    if (existingPlayers.length > 0) {
+      return { status: "skipped", message: "Team already has players" };
+    }
+
+    for (const pitcher of OUR_PITCHERS) {
+      const batter = OUR_BATTING_ORDER.find((b) => b.number === pitcher.number);
+      const playerId = await ctx.db.insert("players", {
+        teamId: args.teamId,
+        name: pitcher.name,
+        number: pitcher.number,
+        position: pitcher.position,
+        isOurPlayer: true,
+      });
+      if (batter) {
+        await ctx.db.insert("playerSeasonStats", {
+          playerId,
+          season: team.season,
+          avg: batter.avg,
+          obp: batter.obp,
+          slg: batter.slg,
+          risp: batter.risp,
+          so: batter.so,
+          bb: batter.bb,
+          sb: batter.sb,
+          ct: batter.ct,
+          xbh: batter.xbh,
+          pitching: {
+            ppi: pitcher.ppi,
+            fps: pitcher.fps,
+            bbPerInning: pitcher.bb,
+            fatiguePoint: pitcher.fatiguePoint,
+          },
+        });
+      }
+    }
+
+    return { status: "seeded", playerCount: OUR_PITCHERS.length };
+  },
+});
